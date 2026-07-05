@@ -22,7 +22,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 # 1. Webhook Signature Verification
 # --------------------------------------------
 def verify_signature(payload: bytes, signature: str) -> bool:
-    """GitHub webhook signature verify करतो (security साठी)"""
+    """Verify GitHub webhook signature for security"""
     if not signature or not signature.startswith('sha256='):
         return False
     expected = 'sha256=' + hmac.new(
@@ -36,7 +36,7 @@ def verify_signature(payload: bytes, signature: str) -> bool:
 # 2. Get Code Files from PR
 # --------------------------------------------
 def get_code_files(pr):
-    """PR मधून फक्त code files (Python, JS, Java) काढतो"""
+    """Extract code files (Python, JS, Java) from PR"""
     files = []
     code_extensions = ['.py', '.js', '.java', '.go', '.rs', '.cpp', '.c', '.h']
     for file in pr.get_files():
@@ -58,7 +58,7 @@ def get_code_files(pr):
 # 3. Security Scan Engine
 # --------------------------------------------
 def security_scan(code: str, filename: str) -> list:
-    """Code मध्ये security issues शोधतो"""
+    """Scan code for security issues"""
     issues = []
     
     # 🔴 CRITICAL patterns
@@ -104,7 +104,7 @@ def security_scan(code: str, filename: str) -> list:
 # 4. Generate Review Report
 # --------------------------------------------
 def generate_review_report(pr_title: str, pr_body: str, files: list) -> str:
-    """PR review report तयार करतो"""
+    """Generate PR review report"""
     report = f"## 🤖 PR Review Report\n\n"
     report += f"**Title:** {pr_title}\n\n"
     if pr_body:
@@ -141,7 +141,7 @@ def generate_review_report(pr_title: str, pr_body: str, files: list) -> str:
 # 5. Background Review Processor
 # --------------------------------------------
 def process_review(repo_full_name: str, pr_number: int, pr_title: str, pr_body: str):
-    """Background मध्ये review process करतो"""
+    """Process review in background"""
     try:
         print(f"🔄 Processing PR #{pr_number} in {repo_full_name}")
         g = Github(GITHUB_TOKEN)
