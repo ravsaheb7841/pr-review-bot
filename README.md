@@ -1,33 +1,73 @@
 # 🤖 PR Review Bot
 
 <p align="center">
-  <strong>An AI-powered GitHub Pull Request Review Bot that automatically detects security vulnerabilities and code quality issues.</strong>
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white">
+  <img src="https://img.shields.io/badge/GitHub%20Apps-181717?logo=github&logoColor=white">
+  <img src="https://img.shields.io/badge/License-MIT-yellow">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10+-blue" alt="Python">
-  <img src="https://img.shields.io/badge/FastAPI-Latest-green" alt="FastAPI">
-  <img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT">
+<b>AI-powered GitHub Pull Request Review Bot for Automated Security and Code Quality Analysis.</b>
 </p>
 
 ---
 
-## 📖 Overview
+# 📖 Overview
 
-PR Review Bot automatically reviews GitHub Pull Requests and identifies potential security vulnerabilities, hardcoded secrets, and code quality issues before code is merged.
+PR Review Bot automatically reviews GitHub Pull Requests and detects security vulnerabilities, hardcoded secrets, and code quality issues before code is merged.
 
-Instead of manually reviewing every Pull Request, the bot performs automated analysis and posts a detailed review comment directly on GitHub.
+Instead of manually reviewing every Pull Request, the bot performs automated static analysis and posts a detailed review directly on GitHub.
 
 ---
 
-# ✨ Features
+# 📸 Demo
 
-- 🔴 Detects dangerous functions like `eval()`, `exec()`, `os.system()`, `pickle.load()`, and `subprocess(shell=True)`
-- 🟡 Detects hardcoded API keys, passwords, tokens, and secrets
-- 🟢 Finds code quality issues such as `print()` statements, TODOs, and FIXMEs
-- ⚡ Automatically reviews Pull Requests using GitHub Webhooks
-- 💬 Posts review comments directly on Pull Requests
-- 📂 Supports scanning multiple changed files
+> Replace this image after uploading it into your repository.
+
+<p align="center">
+<img src="images/pr-review-report.png" width="900">
+</p>
+
+---
+
+# ✨ Key Highlights
+
+- 🔴 Security Vulnerability Detection
+- 🟡 Hardcoded Secret Detection
+- 🟢 Code Quality Analysis
+- ⚡ Automatic PR Reviews
+- 💬 GitHub Review Comments
+- 📂 Multi-file Support
+- 🚀 FastAPI Backend
+- 🔗 GitHub Webhook Integration
+
+---
+
+# 🛡️ Security Checks
+
+### Critical
+
+- `eval()`
+- `exec()`
+- `os.system()`
+- `pickle.load()`
+- `subprocess(shell=True)`
+
+### Medium
+
+- Hardcoded API Keys
+- Passwords
+- Tokens
+- AWS Keys
+- HTTP Requests
+
+### Minor
+
+- print()
+- TODO
+- FIXME
+- Debug Statements
 
 ---
 
@@ -35,24 +75,24 @@ Instead of manually reviewing every Pull Request, the bot performs automated ana
 
 ```text
 Developer
-     │
-     ▼
-Create Pull Request
-     │
-     ▼
+      │
+      ▼
+Create / Update Pull Request
+      │
+      ▼
 GitHub Webhook
-     │
-     ▼
+      │
+      ▼
 FastAPI Server
-     │
-     ▼
-Security & Quality Scanner
-     │
-     ▼
-Generate Review Report
-     │
-     ▼
-Comment on Pull Request
+      │
+      ▼
+Security Scanner
+      │
+      ▼
+Generate Report
+      │
+      ▼
+Post Review Comment
 ```
 
 ---
@@ -79,6 +119,8 @@ pr-review-bot/
 ├── .gitignore
 ├── LICENSE
 ├── .env
+├── images/
+│     └── pr-review-report.png
 └── private-key.pem
 ```
 
@@ -94,7 +136,7 @@ git clone https://github.com/ravsaheb7841/pr-review-bot.git
 cd pr-review-bot
 ```
 
-Create a virtual environment.
+Create virtual environment.
 
 ### Windows
 
@@ -104,7 +146,7 @@ python -m venv pr_bot_env
 pr_bot_env\Scripts\activate
 ```
 
-### Linux / macOS
+### Linux/macOS
 
 ```bash
 python3 -m venv pr_bot_env
@@ -134,7 +176,7 @@ GITHUB_TOKEN=
 
 ---
 
-# ▶️ Run the Project
+# ▶️ Run
 
 Start FastAPI.
 
@@ -148,31 +190,26 @@ Start ngrok.
 ngrok http 8000
 ```
 
-Update your GitHub App webhook URL with the generated HTTPS URL.
+Update your GitHub App Webhook URL.
 
 ---
 
 # 🧪 Example Scan
 
-Example vulnerable code:
-
 ```python
 def process(data):
     return eval(data)
 
-API_KEY = "sk-test"
+API_KEY="sk-test"
 
 print("Hello")
 ```
 
-Example bot output:
+Bot Output
 
 ```text
 🔴 eval() detected
-Risk: Code Injection
-
 🟡 Hardcoded API Key detected
-
 🟢 print() statement detected
 
 Total Issues Found: 3
@@ -180,34 +217,15 @@ Total Issues Found: 3
 
 ---
 
-# 🔒 Security Checks
+# 🎯 Future Improvements
 
-The bot currently detects:
-
-- eval()
-- exec()
-- os.system()
-- pickle.load()
-- subprocess(shell=True)
-- Hardcoded API Keys
-- Passwords
-- Tokens
-- AWS Keys
-- HTTP requests
-- print() statements
-- TODO comments
-- FIXME comments
-
----
-
-# 🚀 Future Improvements
-
-- AI-generated fix suggestions
-- Inline Pull Request comments
-- Multi-language support
-- Docker deployment
-- GitHub Actions integration
-- Security score dashboard
+- AI-powered Fix Suggestions
+- Inline Review Comments
+- Multi-language Support
+- Docker Deployment
+- GitHub Actions
+- Security Dashboard
+- Slack Notifications
 
 ---
 
@@ -215,17 +233,17 @@ The bot currently detects:
 
 Contributions are welcome.
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push the branch
-5. Open a Pull Request
+1. Fork Repository
+2. Create Feature Branch
+3. Commit Changes
+4. Push Changes
+5. Open Pull Request
 
 ---
 
 # 📄 License
 
-This project is licensed under the MIT License.
+Licensed under the MIT License.
 
 ---
 
@@ -233,12 +251,20 @@ This project is licensed under the MIT License.
 
 **Ravsaheb Bansode**
 
-GitHub: https://github.com/ravsaheb7841
+<p>
+<a href="https://github.com/ravsaheb7841">
+<img src="https://img.shields.io/badge/GitHub-ravsaheb7841-181717?logo=github">
+</a>
 
-LinkedIn: https://www.linkedin.com/in/ravsaheb-bansode/
+<a href="https://www.linkedin.com/in/ravsaheb-bansode/">
+<img src="https://img.shields.io/badge/LinkedIn-Ravsaheb_Bansode-0A66C2?logo=linkedin">
+</a>
+</p>
 
 ---
 
 <p align="center">
-⭐ If you found this project useful, please consider giving it a star.
+
+⭐ If you found this project useful, consider giving it a star!
+
 </p>
