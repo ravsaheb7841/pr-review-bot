@@ -235,7 +235,7 @@ This project is licensed under the MIT License.
 
 GitHub: https://github.com/ravsaheb7841
 
-LinkedIn: *(Add your LinkedIn profile)*
+LinkedIn: https://www.linkedin.com/in/ravsaheb-bansode/
 
 ---
 
