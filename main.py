@@ -2,38 +2,43 @@ import json
 import hmac
 import hashlib
 import re
+import os
 from fastapi import FastAPI, Request, Header, HTTPException, BackgroundTasks
 import uvicorn
 from dotenv import load_dotenv
-import os
 from github import Github
 
+# Load environment variables
 load_dotenv()
 
+# Create FastAPI app
 app = FastAPI()
 
-# Environment variables
+# Config
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
+# --------------------------------------------
+# 1. Webhook Signature Verification
+# --------------------------------------------
 def verify_signature(payload: bytes, signature: str) -> bool:
-    """GitHub webhook signature verify करण्यासाठी"""
+    """GitHub webhook signature verify करतो (security साठी)"""
     if not signature or not signature.startswith('sha256='):
         return False
-    
     expected = 'sha256=' + hmac.new(
         GITHUB_WEBHOOK_SECRET.encode(),
         payload,
         hashlib.sha256
     ).hexdigest()
-    
     return hmac.compare_digest(expected, signature)
 
+# --------------------------------------------
+# 2. Get Code Files from PR
+# --------------------------------------------
 def get_code_files(pr):
-    """PR मधील code files फक्त return करा"""
+    """PR मधून फक्त code files (Python, JS, Java) काढतो"""
     files = []
     code_extensions = ['.py', '.js', '.java', '.go', '.rs', '.cpp', '.c', '.h']
-    
     for file in pr.get_files():
         if any(file.filename.endswith(ext) for ext in code_extensions):
             try:
@@ -49,95 +54,120 @@ def get_code_files(pr):
                 continue
     return files
 
+# --------------------------------------------
+# 3. Security Scan Engine
+# --------------------------------------------
 def security_scan(code: str, filename: str) -> list:
-    """Security issues check"""
+    """Code मध्ये security issues शोधतो"""
     issues = []
     
-    patterns = [
-        (r'eval\s*\(', "⚠️ eval() use — code injection risk"),
-        (r'exec\s*\(', "⚠️ exec() use — code injection risk"),
-        (r'__import__\s*\(', "⚠️ Dynamic imports — security risk"),
-        (r'subprocess\.(call|Popen|run)\s*\(', "⚠️ subprocess call — validate inputs"),
-        (r'pickle\.(load|loads)', "⚠️ pickle — deserialization attack risk"),
-        (r'os\.system\s*\(', "⚠️ os.system() — command injection risk"),
-        (r'os\.popen\s*\(', "⚠️ os.popen() — command injection risk"),
+    # 🔴 CRITICAL patterns
+    critical_patterns = [
+        (r'eval\s*\(', "🔴 CRITICAL: eval() use — code injection risk"),
+        (r'exec\s*\(', "🔴 CRITICAL: exec() use — code injection risk"),
+        (r'os\.system\s*\(', "🔴 CRITICAL: os.system() — command injection risk"),
+        (r'os\.popen\s*\(', "🔴 CRITICAL: os.popen() — command injection risk"),
+        (r'subprocess\.(call|Popen|run)\s*\([^)]*shell\s*=\s*True', "🔴 CRITICAL: subprocess with shell=True — shell injection risk"),
+        (r'pickle\.(load|loads)', "🔴 CRITICAL: pickle — deserialization attack risk"),
+        (r'__import__\s*\(', "🔴 CRITICAL: Dynamic imports — security risk"),
     ]
-    
-    for pattern, message in patterns:
+    for pattern, message in critical_patterns:
         if re.search(pattern, code, re.IGNORECASE):
             issues.append(f"📄 `{filename}`: {message}")
     
-    # Hardcoded secrets
-    secret_patterns = [
-        r'API_KEY\s*=\s*["\']([A-Za-z0-9_\-]+)["\']',
-        r'SECRET\s*=\s*["\']([A-Za-z0-9_\-]+)["\']',
-        r'PASSWORD\s*=\s*["\']([A-Za-z0-9_\-]+)["\']',
-        r'token\s*=\s*["\']([A-Za-z0-9_\-]+)["\']',
+    # 🟡 MEDIUM patterns
+    medium_patterns = [
+        (r'API_KEY\s*=\s*["\']([A-Za-z0-9_\-]+)["\']', "🟡 Hardcoded API_KEY found"),
+        (r'SECRET\s*=\s*["\']([A-Za-z0-9_\-]+)["\']', "🟡 Hardcoded SECRET found"),
+        (r'PASSWORD\s*=\s*["\']([A-Za-z0-9_\-]+)["\']', "🟡 Hardcoded PASSWORD found"),
+        (r'token\s*=\s*["\']([A-Za-z0-9_\-]+)["\']', "🟡 Hardcoded token found"),
+        (r'requests\.get\s*\(["\']http://', "🟡 Insecure HTTP request (use HTTPS)"),
     ]
-    for pattern in secret_patterns:
+    for pattern, message in medium_patterns:
         if re.search(pattern, code, re.IGNORECASE):
-            issues.append(f"📄 `{filename}`: ⚠️ Hardcoded secret/token found")
+            issues.append(f"📄 `{filename}`: {message}")
+    
+    # 🟢 MINOR patterns
+    minor_patterns = [
+        (r'print\s*\(', "🐛 print() found — use logging instead"),
+        (r'console\.log\s*\(', "🐛 console.log() found — use logging instead"),
+        (r'TODO', "📌 TODO comment found — address before merge"),
+        (r'FIXME', "⚠️ FIXME comment found — fix before merge"),
+    ]
+    for pattern, message in minor_patterns:
+        if re.search(pattern, code, re.IGNORECASE):
+            issues.append(f"📄 `{filename}`: {message}")
     
     return issues
 
+# --------------------------------------------
+# 4. Generate Review Report
+# --------------------------------------------
 def generate_review_report(pr_title: str, pr_body: str, files: list) -> str:
-    """Complete review report generate करा"""
-    
-    report = f"## 📋 PR Review Report\n\n"
+    """PR review report तयार करतो"""
+    report = f"## 🤖 PR Review Report\n\n"
     report += f"**Title:** {pr_title}\n\n"
-    
     if pr_body:
         report += f"**Description:** {pr_body[:200]}...\n\n"
-    
     report += f"**Files Changed:** {len(files)}\n\n"
     report += "### 📁 Modified Files:\n"
     for f in files:
         report += f"- `{f['filename']}` (+{f['additions']} / -{f['deletions']}) [{f['status']}]\n"
-    
     report += "\n---\n\n"
-    report += "## 🔍 Code Review\n\n"
+    report += "## 🔍 Security Scan Results\n\n"
     
+    total_issues = 0
     for file in files:
         report += f"### 📄 `{file['filename']}`\n\n"
-        
-        issues = []
-        
-        # Line count check
-        lines = file['content'].split('\n')
-        if len(lines) > 300:
-            issues.append("⚠️ File has >300 lines. Consider refactoring.")
-        elif len(lines) > 150:
-            issues.append("📌 File has >150 lines. Consider splitting.")
-        
-        # TODO/FIXME check
-        if 'TODO' in file['content']:
-            issues.append("📌 TODO comments found. Address before merge.")
-        if 'FIXME' in file['content']:
-            issues.append("⚠️ FIXME comments found. Fix before merge.")
-        
-        # Debug statements
-        if 'print(' in file['content'] and '.py' in file['filename']:
-            issues.append("🐛 print() found. Use logging instead.")
-        if 'console.log' in file['content'] and '.js' in file['filename']:
-            issues.append("🐛 console.log() found. Use logging instead.")
-        
-        # Security scan
-        security_issues = security_scan(file['content'], file['filename'])
-        issues.extend(security_issues)
-        
+        issues = security_scan(file['content'], file['filename'])
         if issues:
+            total_issues += len(issues)
             for issue in issues:
                 report += f"- {issue}\n"
         else:
-            report += "✅ No issues found.\n"
-        
+            report += "✅ No issues found in this file.\n"
         report += "\n"
     
-    report += "---\n"
-    report += "🤖 *This review was generated automatically.*"
+    if total_issues == 0:
+        report += "## 🎉 No security issues detected! Good job! 🎉\n\n"
+    else:
+        report += f"## ⚠️ Found {total_issues} issue(s) that need attention.\n\n"
     
+    report += "---\n"
+    report += "🤖 *This review was automatically generated by PR Review Bot.*\n"
     return report
 
+# --------------------------------------------
+# 5. Background Review Processor
+# --------------------------------------------
+def process_review(repo_full_name: str, pr_number: int, pr_title: str, pr_body: str):
+    """Background मध्ये review process करतो"""
+    try:
+        print(f"🔄 Processing PR #{pr_number} in {repo_full_name}")
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(repo_full_name)
+        pr = repo.get_pull(pr_number)
+        files = get_code_files(pr)
+        if not files:
+            pr.create_issue_comment("ℹ️ No code files found to review.")
+            return
+        print(f"📁 Found {len(files)} files")
+        report = generate_review_report(pr_title, pr_body, files)
+        pr.create_issue_comment(report)
+        print(f"✅ Review posted on PR #{pr_number}")
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        try:
+            g = Github(GITHUB_TOKEN)
+            repo = g.get_repo(repo_full_name)
+            pr = repo.get_pull(pr_number)
+            pr.create_issue_comment(f"❌ Error while reviewing: {str(e)}")
+        except:
+            pass
+
+# --------------------------------------------
+# 6. Webhook Endpoint
+# --------------------------------------------
 @app.post("/webhook")
 async def webhook_handler(
     request: Request,
@@ -176,45 +206,11 @@ async def webhook_handler(
         pr_title,
         pr_body
     )
-    
     return {"status": "review_scheduled", "pr": pr_number}
 
-def process_review(repo_full_name: str, pr_number: int, pr_title: str, pr_body: str):
-    """Background review processing"""
-    try:
-        print(f"🔄 Processing PR #{pr_number} in {repo_full_name}")
-        
-        g = Github(GITHUB_TOKEN)
-        repo = g.get_repo(repo_full_name)
-        pr = repo.get_pull(pr_number)
-        
-        # Get code files
-        files = get_code_files(pr)
-        
-        if not files:
-            pr.create_issue_comment("ℹ️ No code files found to review.")
-            return
-        
-        print(f"📁 Found {len(files)} files")
-        
-        # Generate report
-        report = generate_review_report(pr_title, pr_body, files)
-        
-        # Post comment
-        pr.create_issue_comment(report)
-        
-        print(f"✅ Review posted on PR #{pr_number}")
-        
-    except Exception as e:
-        print(f"❌ Error: {str(e)}")
-        try:
-            g = Github(GITHUB_TOKEN)
-            repo = g.get_repo(repo_full_name)
-            pr = repo.get_pull(pr_number)
-            pr.create_issue_comment(f"❌ Error: {str(e)}")
-        except:
-            pass
-
+# --------------------------------------------
+# 7. Health Check Endpoints
+# --------------------------------------------
 @app.get("/")
 async def root():
     return {"message": "PR Review Bot is running!", "status": "healthy"}
@@ -223,5 +219,8 @@ async def root():
 async def health():
     return {"status": "ok"}
 
+# --------------------------------------------
+# 8. Main Entry Point
+# --------------------------------------------
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

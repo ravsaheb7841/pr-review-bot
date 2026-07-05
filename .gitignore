@@ -1,5 +1,97 @@
+# ------------------------------
+# Python / Virtual Environment
+# ------------------------------
+# Virtual Environment
 pr_bot_env/
-venv/
+.python-version
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+*.log
+
+# ------------------------------
+# Environment Variables (CRITICAL!)
+# ------------------------------
 .env
+.env.local
+.env.*.local
+
+# ------------------------------
+# GitHub App Private Key (CRITICAL!)
+# ------------------------------
+*.pem
+private-key.pem
+*.key
+*.crt
+
+# ------------------------------
+# IDE / Editor Files
+# ------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ------------------------------
+# OS Files
+# ------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.tmp
+*.temp
+
+# ------------------------------
+# Project Specific
+# ------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.pid
+*.seed
+*.pid.lock
+*.log
+
+# ------------------------------
+# Jupyter Notebooks (जर असेल तर)
+# ------------------------------
+.ipynb_checkpoints/
+*.ipynb
+
+# ------------------------------
+# ngrok (optional)
+# ------------------------------
+ngrok.yml
+ngrok.log
+
+# ------------------------------
+# Misc
+# ------------------------------
+*.bak
+*.orig
+*.old
+*.swp
