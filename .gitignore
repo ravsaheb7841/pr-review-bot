@@ -1,0 +1,5 @@
+pr_bot_env/
+venv/
+__pycache__/
+*.pyc
+.env
