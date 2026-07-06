@@ -26,8 +26,8 @@ Instead of manually reviewing every Pull Request, the bot performs automated sta
 > Replace this image after uploading it into your repository.
 
 <p align="center">
-  <img src="images/pr-review-report_1.png" alt="Report 1" width="45%">
-  <img src="images/pr-review-report_2.png" alt="Report 2" width="45%">
+  <img src="images/pr-review-report_1.png" width="48%" />
+  <img src="images/pr-review-report_2.png" width="48%" />
 </p>
 
 ---
