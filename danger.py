@@ -1,44 +1,84 @@
-# danger.py - Intentionally insecure code for testing security scanners
+# danger.py
+"""
+Sample application containing intentionally insecure code.
+
+Purpose:
+This file is used for testing automated security review tools,
+static analyzers, and GitHub PR Review Bots.
+
+DO NOT USE IN PRODUCTION.
+"""
 
 import os
 import pickle
 import subprocess
 import requests
-import webbrowser  # Unused import
 
-# [CRITICAL] Code Injection
-def execute_code(user_input):
-    result = eval(user_input)  # Can execute arbitrary code
-    return result
 
-# [CRITICAL] Command Injection
-def delete_everything():
-    os.system("rm -rf /")  # Dangerous system command
+class SecurityTestApplication:
+    """Application used for security scanner testing."""
 
-# [CRITICAL] Shell Injection
-def run_command(cmd):
-    subprocess.call(cmd, shell=True)  # shell=True is unsafe
+    def execute_user_expression(self, expression: str):
+        """
+        Intentionally vulnerable:
+        Uses eval() on user input.
+        """
+        return eval(expression)
 
-# [CRITICAL] Deserialization Attack
-def load_data():
-    with open("data.pkl", "rb") as f:
-        data = pickle.load(f)  # Unsafe deserialization
-    return data
+    def execute_system_command(self, command: str):
+        """
+        Intentionally vulnerable:
+        Executes a shell command.
+        """
+        os.system(command)
 
-# [MEDIUM] Hardcoded Secrets
-API_KEY = "sk-1234567890abcdef"
-DATABASE_PASSWORD = "admin@123"
-JWT_SECRET = "mysecretkey123"
+    def execute_shell_process(self, command: str):
+        """
+        Intentionally vulnerable:
+        Uses shell=True.
+        """
+        subprocess.run(command, shell=True)
 
-# [MEDIUM] Insecure HTTP Request
-def send_request():
-    requests.get("http://api.example.com/data")  # Uses HTTP instead of HTTPS
+    def load_serialized_object(self, filename: str):
+        """
+        Intentionally vulnerable:
+        Unsafe pickle deserialization.
+        """
+        with open(filename, "rb") as file:
+            return pickle.load(file)
 
-# [LOW] Debug Statements
-def process():
-    print("Processing started...")  # Should use logging
-    # TODO: Add error handling
-    # FIXME: This function is incomplete
+    def fetch_remote_data(self):
+        """
+        Intentionally vulnerable:
+        Uses insecure HTTP.
+        """
+        return requests.get("http://api.example.com/data")
+
+
+# ------------------------------------------------------------------
+# Intentionally hardcoded secrets for scanner validation
+# ------------------------------------------------------------------
+
+API_KEY = "sk-test-1234567890"
+DATABASE_PASSWORD = "admin123"
+JWT_SECRET = "sample-secret-key"
+
+
+def debug_operation():
+    """Debug function used for scanner validation."""
+
+    print("Application started")
+
+    # TODO: Replace print() with logging.
+    # FIXME: Add exception handling.
+
+    return True
+
 
 if __name__ == "__main__":
-    delete_everything()
+    app = SecurityTestApplication()
+
+    app.execute_user_expression("2 + 2")
+    app.execute_system_command("echo Testing")
+    app.execute_shell_process("dir")
+    debug_operation()
