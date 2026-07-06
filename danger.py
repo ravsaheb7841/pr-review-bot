@@ -41,4 +41,4 @@ def process():
     # FIXME: This function is incomplete
 
 if __name__ == "__main__":
-    delete_everything()
+    delete_everything() 
