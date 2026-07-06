@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request, Header, HTTPException, BackgroundTasks
 import uvicorn
 from dotenv import load_dotenv
 from github import Github
+from github import GithubIntegration
 
 # Load environment variables
 load_dotenv()
@@ -14,9 +15,11 @@ load_dotenv()
 # Create FastAPI app
 app = FastAPI()
 
-# Config
+# Config - Render वर Environment Variables मधून वाचा
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_APP_ID = os.getenv("GITHUB_APP_ID")
+GITHUB_PRIVATE_KEY = os.getenv("GITHUB_PRIVATE_KEY")
 
 # --------------------------------------------
 # 1. Webhook Signature Verification
@@ -182,20 +185,38 @@ def process_review(repo_full_name: str, pr_number: int, pr_title: str, pr_body: 
     """Process review in background"""
     try:
         print(f"[INFO] Processing PR #{pr_number} in {repo_full_name}")
-        g = Github(GITHUB_TOKEN)
+        
+        # GitHub App Authentication (Render वर)
+        if GITHUB_APP_ID and GITHUB_PRIVATE_KEY:
+            integration = GithubIntegration(GITHUB_APP_ID, GITHUB_PRIVATE_KEY)
+            installations = integration.get_installations()
+            if installations:
+                access_token = integration.get_access_token(installations[0].id)
+                g = Github(access_token.token)
+            else:
+                print("[WARNING] No installations found. Using token fallback.")
+                g = Github(GITHUB_TOKEN)
+        else:
+            print("[WARNING] App credentials not found. Using token fallback.")
+            g = Github(GITHUB_TOKEN)
+        
         repo = g.get_repo(repo_full_name)
         pr = repo.get_pull(pr_number)
         files = get_code_files(pr)
+        
         if not files:
             pr.create_issue_comment("[INFO] No code files found to review.")
             return
+        
         print(f"[INFO] Reviewing {len(files)} modified file(s)")
         report = generate_review_report(pr_title, pr_body, files)
         pr.create_issue_comment(report)
         print(f"[PASSED] Review posted on PR #{pr_number}")
+        
     except Exception as e:
         print(f"[ERROR] {str(e)}")
         try:
+            # Fallback to token
             g = Github(GITHUB_TOKEN)
             repo = g.get_repo(repo_full_name)
             pr = repo.get_pull(pr_number)
@@ -261,4 +282,5 @@ async def health():
 # 8. Main Entry Point
 # --------------------------------------------
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
