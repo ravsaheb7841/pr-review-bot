@@ -8,71 +8,70 @@
 </p>
 
 <p align="center">
-<b>AI-powered GitHub Pull Request Review Bot for Automated Security and Code Quality Analysis.</b>
+  <b>AI-powered GitHub Pull Request Review Bot for Automated Security & Code Quality Analysis.</b>
 </p>
 
 ---
 
-# 📖 Overview
+## 📖 Overview
 
-PR Review Bot automatically reviews GitHub Pull Requests and detects security vulnerabilities, hardcoded secrets, and code quality issues before code is merged.
+PR Review Bot is a GitHub App that automatically reviews Pull Requests to detect security vulnerabilities, hardcoded secrets, and code quality issues before code is merged.
 
-Instead of manually reviewing every Pull Request, the bot performs automated static analysis and posts a detailed review directly on GitHub.
+The bot performs automated static analysis whenever a Pull Request is opened or updated and posts a detailed review directly on GitHub, helping developers identify potential problems early in the development process.
 
 ---
 
-# 📸 Demo
+## 🚀 Installation
 
-> Replace this image after uploading it into your repository.
+Install the GitHub App using the link below.
 
 <p align="center">
-  <img src="images/pr-review-report_1.png" width="48%" />
-  <img src="images/pr-review-report_2.png" width="48%" />
+
+### 👉 [Install PR Review Bot](https://github.com/apps/PR-Review-Bot-Ravsaheb-Bansode/installations/new)
+
+</p>
+
+### Usage
+
+1. Install the GitHub App.
+2. Select your GitHub account or organization.
+3. Choose the repositories to monitor.
+4. Open or update a Pull Request.
+5. The bot automatically analyzes the code and posts a review comment.
+
+---
+
+## 📸 Demo
+
+<p align="center">
+  <img src="images/pr-review-report_1.png" width="48%" alt="PR Review Report">
+  <img src="images/pr-review-report_2.png" width="48%" alt="Security Scan Report">
 </p>
 
 ---
 
-# ✨ Key Highlights
+## ✨ Features
 
-- 🔴 Security Vulnerability Detection
-- 🟡 Hardcoded Secret Detection
-- 🟢 Code Quality Analysis
-- ⚡ Automatic PR Reviews
-- 💬 GitHub Review Comments
-- 📂 Multi-file Support
-- 🚀 FastAPI Backend
-- 🔗 GitHub Webhook Integration
+- 🔍 Automated Pull Request Review
+- 🛡️ Security Vulnerability Detection
+- 🔐 Hardcoded Secret Detection
+- 📊 Code Quality Analysis
+- 💬 Automatic Review Comments on Pull Requests
+- ⚡ FastAPI-powered Webhook Server
+- ☁️ Deployable on Render
+- 🔗 GitHub App Integration
 
----
+### Security Checks
 
-# 🛡️ Security Checks
-
-### Critical
-
-- `eval()`
-- `exec()`
-- `os.system()`
-- `pickle.load()`
-- `subprocess(shell=True)`
-
-### Medium
-
-- Hardcoded API Keys
-- Passwords
-- Tokens
-- AWS Keys
-- HTTP Requests
-
-### Minor
-
-- print()
-- TODO
-- FIXME
-- Debug Statements
+| Severity | Checks |
+|----------|--------|
+| 🔴 Critical | `eval()`, `exec()`, `os.system()`, `pickle.load()`, `subprocess(shell=True)` |
+| 🟡 Medium | Hardcoded API Keys, Passwords, Tokens, Insecure HTTP URLs |
+| 🟢 Low | `print()`, `console.log()`, TODO, FIXME Comments |
 
 ---
 
-# 🏗️ Architecture
+## 🏗️ Architecture
 
 ```text
 Developer
@@ -90,26 +89,28 @@ FastAPI Server
 Security Scanner
       │
       ▼
-Generate Report
+Generate Review Report
       │
       ▼
-Post Review Comment
+Post Comment on Pull Request
 ```
 
 ---
 
-# 🛠️ Tech Stack
+## 🛠️ Tech Stack
 
-- Python
-- FastAPI
-- PyGithub
-- GitHub Apps
-- GitHub Webhooks
-- ngrok
+| Component | Technology |
+|----------|------------|
+| Language | Python 3.10+ |
+| Backend | FastAPI |
+| GitHub Integration | GitHub Apps, PyGithub |
+| Deployment | Render |
+| Local Testing | ngrok |
+| Scanner | Custom Pattern Matching |
 
 ---
 
-# 📂 Project Structure
+## 📂 Project Structure
 
 ```text
 pr-review-bot/
@@ -117,138 +118,108 @@ pr-review-bot/
 ├── main.py
 ├── requirements.txt
 ├── README.md
-├── .gitignore
 ├── LICENSE
+├── .gitignore
 ├── .env
 ├── images/
-│     └── pr-review-report.png
+│   ├── pr-review-report_1.png
+│   └── pr-review-report_2.png
 └── private-key.pem
 ```
 
 ---
 
-# 🚀 Installation
+## 🚀 Developer Setup
 
-Clone the repository.
+### Clone the Repository
 
 ```bash
 git clone https://github.com/ravsaheb7841/pr-review-bot.git
-
 cd pr-review-bot
 ```
 
-Create virtual environment.
+### Create a Virtual Environment
 
-### Windows
+**Windows**
 
 ```bash
 python -m venv pr_bot_env
-
 pr_bot_env\Scripts\activate
 ```
 
-### Linux/macOS
+**Linux/macOS**
 
 ```bash
 python3 -m venv pr_bot_env
-
 source pr_bot_env/bin/activate
 ```
 
-Install dependencies.
+### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-# ⚙️ Environment Variables
+### Configure Environment Variables
 
 Create a `.env` file.
 
 ```env
-GITHUB_APP_ID=
-
-GITHUB_WEBHOOK_SECRET=
-
-GITHUB_TOKEN=
+GITHUB_APP_ID=YOUR_APP_ID
+GITHUB_WEBHOOK_SECRET=YOUR_WEBHOOK_SECRET
+GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 ```
 
----
-
-# ▶️ Run
-
-Start FastAPI.
+### Run the Application
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Start ngrok.
+### Test Using ngrok
 
 ```bash
 ngrok http 8000
 ```
 
-Update your GitHub App Webhook URL.
-
 ---
 
-# 🧪 Example Scan
+## 🧪 Example Scan
+
+### Sample Vulnerable Code
 
 ```python
 def process(data):
     return eval(data)
 
-API_KEY="sk-test"
+API_KEY = "sk-test"
 
 print("Hello")
 ```
 
-Bot Output
+### Bot Output
 
 ```text
-🔴 eval() detected
-🟡 Hardcoded API Key detected
-🟢 print() statement detected
+## PR Review Report
 
-Total Issues Found: 3
+File: test.py
+
+[CRITICAL] eval() detected — Code Injection Risk
+
+[MEDIUM] Hardcoded API_KEY detected
+
+[LOW] print() statement found — Consider using logging
 ```
 
 ---
 
-# 🎯 Future Improvements
+## 📄 License
 
-- AI-powered Fix Suggestions
-- Inline Review Comments
-- Multi-language Support
-- Docker Deployment
-- GitHub Actions
-- Security Dashboard
-- Slack Notifications
+This project is licensed under the **MIT License**.
 
 ---
 
-# 🤝 Contributing
-
-Contributions are welcome.
-
-1. Fork Repository
-2. Create Feature Branch
-3. Commit Changes
-4. Push Changes
-5. Open Pull Request
-
----
-
-# 📄 License
-
-Licensed under the MIT License.
-
----
-
-# 👨‍💻 Author
+## 👨‍💻 Author
 
 **Ravsaheb Bansode**
 
@@ -265,7 +236,5 @@ Licensed under the MIT License.
 ---
 
 <p align="center">
-
-⭐ If you found this project useful, consider giving it a star!
-
+⭐ If you found this project useful, consider giving it a star.
 </p>
