@@ -19,8 +19,13 @@ app = FastAPI()
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_APP_ID = os.getenv("GITHUB_APP_ID")
-GITHUB_PRIVATE_KEY = os.getenv("GITHUB_PRIVATE_KEY")
-
+GITHUB_PRIVATE_KEY_PATH = os.getenv("GITHUB_PRIVATE_KEY_PATH")
+if GITHUB_PRIVATE_KEY_PATH:
+    with open(GITHUB_PRIVATE_KEY_PATH, 'r') as f:
+        GITHUB_PRIVATE_KEY = f.read()
+else:
+    GITHUB_PRIVATE_KEY = os.getenv("GITHUB_PRIVATE_KEY")
+    
 # --------------------------------------------
 # 1. Webhook Signature Verification
 # --------------------------------------------
